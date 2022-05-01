@@ -1,4 +1,7 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf}, io,
+};
 
 use chrono::Datelike;
 
@@ -48,4 +51,10 @@ fn get_diary_entry_path(pepys_dir: &PathBuf) -> PathBuf {
     diary_entry_path.push(format!("{:02}.txt", now.day()));
 
     diary_entry_path
+}
+
+fn create_diary_entry(path: &Path) -> io::Result<std::fs::File> {
+    let prefix = path.parent().expect("Failed to get parent directory of diary entry path");
+    std::fs::create_dir_all(prefix)?;
+    std::fs::File::create(path)
 }
