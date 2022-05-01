@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
+
+use chrono::Datelike;
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -12,7 +14,9 @@ fn main() {
         dir.push(DEFAULT_DIARY_PATH);
         dir
     };
-    println!("{:?}", &pepys_dir);
+
+    let diary_entry_path = get_diary_entry_path(&pepys_dir);
+    println!("{:?}", diary_entry_path);
 }
 
 fn read_config() -> HashMap<String, String> {
@@ -33,4 +37,15 @@ fn read_config() -> HashMap<String, String> {
     }
 
     config
+}
+
+fn get_diary_entry_path(pepys_dir: &PathBuf) -> PathBuf {
+    let mut diary_entry_path = pepys_dir.clone();
+
+    let now = chrono::Utc::now();
+    diary_entry_path.push(format!("{:02}", now.year()));
+    diary_entry_path.push(format!("{:02}", now.month()));
+    diary_entry_path.push(format!("{:02}.txt", now.day()));
+
+    diary_entry_path
 }
