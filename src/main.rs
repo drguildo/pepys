@@ -23,9 +23,6 @@ fn main() {
     if !diary_entry_path.exists() {
         if create_diary_entry(&diary_entry_path).is_ok() {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
-            if edit::edit_file(&diary_entry_path).is_err() {
-                eprintln!("Failed to spawn editor");
-            }
         } else {
             eprintln!(
                 "Failed to create diary entry {}",
@@ -33,6 +30,10 @@ fn main() {
             );
             std::process::exit(-1);
         }
+    }
+
+    if edit::edit_file(&diary_entry_path).is_err() {
+        eprintln!("Failed to spawn editor");
     }
 }
 
