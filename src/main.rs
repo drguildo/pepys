@@ -23,6 +23,9 @@ fn main() {
     if !diary_entry_path.exists() {
         if let Ok(_) = create_diary_entry(&diary_entry_path) {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
+            if edit::edit_file(&diary_entry_path).is_err() {
+                eprintln!("Failed to spawn editor");
+            }
         } else {
             eprintln!(
                 "Failed to create diary entry {}",

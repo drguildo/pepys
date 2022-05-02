@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4"
 dirs = "4"
+edit = "0.1"
