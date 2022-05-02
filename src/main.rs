@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
-    path::{Path, PathBuf}, io,
+    io,
+    path::{Path, PathBuf},
 };
 
 use chrono::Datelike;
@@ -19,7 +20,17 @@ fn main() {
     };
 
     let diary_entry_path = get_diary_entry_path(&pepys_dir);
-    println!("{:?}", diary_entry_path);
+    if !diary_entry_path.exists() {
+        if let Ok(_) = create_diary_entry(&diary_entry_path) {
+            println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
+        } else {
+            eprintln!(
+                "Failed to create diary entry {}",
+                diary_entry_path.to_str().unwrap()
+            );
+            std::process::exit(-1);
+        }
+    }
 }
 
 fn read_config() -> HashMap<String, String> {
@@ -54,7 +65,9 @@ fn get_diary_entry_path(pepys_dir: &PathBuf) -> PathBuf {
 }
 
 fn create_diary_entry(path: &Path) -> io::Result<std::fs::File> {
-    let prefix = path.parent().expect("Failed to get parent directory of diary entry path");
+    let prefix = path
+        .parent()
+        .expect("Failed to get parent directory of diary entry path");
     std::fs::create_dir_all(prefix)?;
     std::fs::File::create(path)
 }
