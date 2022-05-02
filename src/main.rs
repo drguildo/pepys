@@ -21,7 +21,7 @@ fn main() {
 
     let diary_entry_path = get_diary_entry_path(&pepys_dir);
     if !diary_entry_path.exists() {
-        if let Ok(_) = create_diary_entry(&diary_entry_path) {
+        if create_diary_entry(&diary_entry_path).is_ok() {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
             if edit::edit_file(&diary_entry_path).is_err() {
                 eprintln!("Failed to spawn editor");
@@ -56,8 +56,8 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(pepys_dir: &PathBuf) -> PathBuf {
-    let mut diary_entry_path = pepys_dir.clone();
+fn get_diary_entry_path(pepys_dir: &Path) -> PathBuf {
+    let mut diary_entry_path = pepys_dir.to_path_buf();
 
     let now = chrono::Utc::now();
     diary_entry_path.push(format!("{:02}", now.year()));
