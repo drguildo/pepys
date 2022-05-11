@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use chrono::Datelike;
+use chrono::{Datelike, DateTime, Utc};
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -19,7 +19,7 @@ fn main() {
         dir
     };
 
-    let diary_entry_path = get_diary_entry_path(&pepys_dir);
+    let diary_entry_path = get_diary_entry_path(&pepys_dir, &Utc::now());
     if !diary_entry_path.exists() {
         if create_diary_entry(&diary_entry_path).is_ok() {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
@@ -57,13 +57,12 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(pepys_dir: &Path) -> PathBuf {
-    let mut diary_entry_path = pepys_dir.to_path_buf();
+fn get_diary_entry_path(diary_path: &Path, entry_date: &DateTime<Utc>) -> PathBuf {
+    let mut diary_entry_path = diary_path.to_path_buf();
 
-    let now = chrono::Utc::now();
-    diary_entry_path.push(format!("{:02}", now.year()));
-    diary_entry_path.push(format!("{:02}", now.month()));
-    diary_entry_path.push(format!("{:02}.txt", now.day()));
+    diary_entry_path.push(format!("{:02}", entry_date.year()));
+    diary_entry_path.push(format!("{:02}", entry_date.month()));
+    diary_entry_path.push(format!("{:02}.txt", entry_date.day()));
 
     diary_entry_path
 }
