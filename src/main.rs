@@ -1,10 +1,10 @@
 use std::{
     collections::HashMap,
     io,
-    path::{Path, PathBuf},
+    path::{Path, PathBuf}, env::args,
 };
 
-use chrono::{Datelike, DateTime, Utc};
+use chrono::{Datelike, Utc};
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -19,7 +19,22 @@ fn main() {
         dir
     };
 
-    let diary_entry_path = get_diary_entry_path(&pepys_dir, &Utc::now());
+    let arg = args().skip(1).next();
+    let diary_entry_path = if let Some(date_arg) = arg {
+        let split: Vec<&str> = date_arg.split("-").collect();
+        if split.len() != 3 {
+            eprintln!("Invalid date");
+            std::process::exit(-1);
+        }
+        let year = split[0].parse::<u32>().expect("Invalid year");
+        let month = split[1].parse::<u32>().expect("Invalid month");
+        let day = split[2].parse::<u32>().expect("Invalid day");
+        get_diary_entry_path(&pepys_dir, year, month, day)
+    } else {
+        let now = Utc::now();
+        get_diary_entry_path(&pepys_dir, now.year_ce().1, now.month(), now.day())
+    };
+
     if !diary_entry_path.exists() {
         if create_diary_entry(&diary_entry_path).is_ok() {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
@@ -57,12 +72,12 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(diary_path: &Path, entry_date: &DateTime<Utc>) -> PathBuf {
+fn get_diary_entry_path(diary_path: &Path, year: u32, month: u32, day: u32) -> PathBuf {
     let mut diary_entry_path = diary_path.to_path_buf();
 
-    diary_entry_path.push(format!("{:02}", entry_date.year()));
-    diary_entry_path.push(format!("{:02}", entry_date.month()));
-    diary_entry_path.push(format!("{:02}.txt", entry_date.day()));
+    diary_entry_path.push(format!("{:02}", year));
+    diary_entry_path.push(format!("{:02}", month));
+    diary_entry_path.push(format!("{:02}.txt", day));
 
     diary_entry_path
 }
