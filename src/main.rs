@@ -21,7 +21,7 @@ fn main() {
 
     let arg = args().nth(1);
     let diary_entry_path = if let Some(date_arg) = arg {
-        let split: Vec<&str> = date_arg.split("-").collect();
+        let split: Vec<&str> = date_arg.split('-').collect();
         if split.len() != 3 {
             eprintln!("Invalid date");
             std::process::exit(-1);
