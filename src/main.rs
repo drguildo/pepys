@@ -1,10 +1,11 @@
 use std::{
     collections::HashMap,
+    env::args,
     io,
-    path::{Path, PathBuf}, env::args,
+    path::{Path, PathBuf},
 };
 
-use chrono::{Datelike, Utc};
+use chrono::{Date, Datelike, TimeZone, Utc};
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -20,21 +21,26 @@ fn main() {
     };
 
     let arg = args().nth(1);
-    let diary_entry_path = if let Some(date_arg) = arg {
+    let entry_date = if let Some(date_arg) = arg {
         let split: Vec<&str> = date_arg.split('-').collect();
         if split.len() != 3 {
             eprintln!("Invalid date");
             std::process::exit(-1);
         }
-        let year = split[0].parse::<u32>().expect("Invalid year");
+        let year = split[0].parse::<i32>().expect("Invalid year");
         let month = split[1].parse::<u32>().expect("Invalid month");
         let day = split[2].parse::<u32>().expect("Invalid day");
-        get_diary_entry_path(&pepys_dir, year, month, day)
+        if let chrono::LocalResult::Single(validated_date) = Utc.ymd_opt(year, month, day) {
+            validated_date
+        } else {
+            eprintln!("Invalid date. Date should be in format YYYY-MM-DD and be valid.");
+            std::process::exit(-1);
+        }
     } else {
-        let now = Utc::now();
-        get_diary_entry_path(&pepys_dir, now.year_ce().1, now.month(), now.day())
+        Utc::now().date()
     };
 
+    let diary_entry_path = get_diary_entry_path(&pepys_dir, &entry_date);
     if !diary_entry_path.exists() {
         if create_diary_entry(&diary_entry_path).is_ok() {
             println!("Created diary entry {}", diary_entry_path.to_str().unwrap());
@@ -72,12 +78,12 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(diary_path: &Path, year: u32, month: u32, day: u32) -> PathBuf {
+fn get_diary_entry_path(diary_path: &Path, entry_date: &Date<Utc>) -> PathBuf {
     let mut diary_entry_path = diary_path.to_path_buf();
 
-    diary_entry_path.push(format!("{:02}", year));
-    diary_entry_path.push(format!("{:02}", month));
-    diary_entry_path.push(format!("{:02}.txt", day));
+    diary_entry_path.push(format!("{:02}", entry_date.year()));
+    diary_entry_path.push(format!("{:02}", entry_date.month()));
+    diary_entry_path.push(format!("{:02}.txt", entry_date.day()));
 
     diary_entry_path
 }
