@@ -19,7 +19,7 @@ fn main() {
         dir
     };
 
-    let arg = args().skip(1).next();
+    let arg = args().nth(1);
     let diary_entry_path = if let Some(date_arg) = arg {
         let split: Vec<&str> = date_arg.split("-").collect();
         if split.len() != 3 {
