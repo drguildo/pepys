@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use chrono::{Date, Datelike, TimeZone, Utc};
+use chrono::{Datelike, NaiveDate, Utc};
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -30,14 +30,14 @@ fn main() {
         let year = split[0].parse::<i32>().expect("Invalid year");
         let month = split[1].parse::<u32>().expect("Invalid month");
         let day = split[2].parse::<u32>().expect("Invalid day");
-        if let chrono::LocalResult::Single(validated_date) = Utc.ymd_opt(year, month, day) {
+        if let Some(validated_date) = NaiveDate::from_ymd_opt(year, month, day) {
             validated_date
         } else {
             eprintln!("Invalid date. Date should be in format YYYY-MM-DD and be valid.");
             std::process::exit(-1);
         }
     } else {
-        Utc::now().date()
+        Utc::now().date_naive()
     };
 
     let diary_entry_path = get_diary_entry_path(&pepys_dir, &entry_date);
@@ -78,7 +78,7 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(diary_path: &Path, entry_date: &Date<Utc>) -> PathBuf {
+fn get_diary_entry_path(diary_path: &Path, entry_date: &NaiveDate) -> PathBuf {
     let mut diary_entry_path = diary_path.to_path_buf();
 
     diary_entry_path.push(format!("{:02}", entry_date.year()));
