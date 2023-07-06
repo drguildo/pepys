@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use chrono::{Datelike, NaiveDate, Utc};
+use time::{macros::format_description, OffsetDateTime};
 
 const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
@@ -22,22 +22,15 @@ fn main() {
 
     let arg = args().nth(1);
     let entry_date = if let Some(date_arg) = arg {
-        let split: Vec<&str> = date_arg.split('-').collect();
-        if split.len() != 3 {
-            eprintln!("Invalid date");
-            std::process::exit(-1);
-        }
-        let year = split[0].parse::<i32>().expect("Invalid year");
-        let month = split[1].parse::<u32>().expect("Invalid month");
-        let day = split[2].parse::<u32>().expect("Invalid day");
-        if let Some(validated_date) = NaiveDate::from_ymd_opt(year, month, day) {
+        let format = format_description!("[year]-[month]-[day]");
+        if let Ok(validated_date) = time::OffsetDateTime::parse(&date_arg, &format) {
             validated_date
         } else {
             eprintln!("Invalid date. Date should be in format YYYY-MM-DD and be valid.");
             std::process::exit(-1);
         }
     } else {
-        Utc::now().date_naive()
+        time::OffsetDateTime::now_utc()
     };
 
     let diary_entry_path = get_diary_entry_path(&pepys_dir, &entry_date);
@@ -78,11 +71,11 @@ fn read_config() -> HashMap<String, String> {
     config
 }
 
-fn get_diary_entry_path(diary_path: &Path, entry_date: &NaiveDate) -> PathBuf {
+fn get_diary_entry_path(diary_path: &Path, entry_date: &OffsetDateTime) -> PathBuf {
     let mut diary_entry_path = diary_path.to_path_buf();
 
     diary_entry_path.push(format!("{:02}", entry_date.year()));
-    diary_entry_path.push(format!("{:02}", entry_date.month()));
+    diary_entry_path.push(format!("{:02}", entry_date.month() as u8));
     diary_entry_path.push(format!("{:02}.txt", entry_date.day()));
 
     diary_entry_path
