@@ -11,7 +11,8 @@ const CONFIG_FILENAME: &str = "pepys.conf";
 const DEFAULT_DIARY_PATH: &str = "pepys";
 
 fn main() {
-    let config = read_config();
+    let config_path = get_config_path();
+    let config = read_config(&config_path);
     let pepys_dir = if config.contains_key("diary_path") {
         std::path::PathBuf::from(config.get("diary_path").unwrap())
     } else {
@@ -51,11 +52,14 @@ fn main() {
     }
 }
 
-fn read_config() -> HashMap<String, String> {
-    let mut config = HashMap::new();
-
+fn get_config_path() -> PathBuf {
     let mut config_path = dirs::config_dir().expect("Failed to find user configuration directory");
     config_path.push(CONFIG_FILENAME);
+    config_path
+}
+
+fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
+    let mut config = HashMap::new();
 
     if config_path.exists() {
         let config_contents =
