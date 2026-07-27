@@ -12,13 +12,10 @@ fn main() {
     let config_path = config::get_config_path();
 
     let config = config::read_config(&config_path);
-    let pepys_dir = if config.contains_key("diary_path") {
-        std::path::PathBuf::from(config.get("diary_path").unwrap())
-    } else {
-        let mut dir = dirs::home_dir().expect("Failed to locate home directory");
-        dir.push(config::DEFAULT_DIARY_PATH);
-        dir
-    };
+    let diary_path = config
+        .get("diary_path")
+        .expect("config should contain diary_path");
+    let pepys_dir = std::path::PathBuf::from(diary_path);
 
     let arg = args().nth(1);
     let entry_date = if let Some(date_arg) = arg {

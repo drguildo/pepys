@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
-pub(crate) const CONFIG_FILENAME: &str = "pepys.conf";
-pub(crate) const DEFAULT_DIARY_PATH: &str = "pepys";
+const CONFIG_FILENAME: &str = "pepys.conf";
+const DEFAULT_DIARY_PATH: &str = "pepys";
 
 pub fn get_config_path() -> PathBuf {
     let mut config_path = dirs::config_dir().expect("Failed to find user configuration directory");
@@ -17,7 +17,7 @@ pub fn get_config_path() -> PathBuf {
 }
 
 pub fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
-    let mut config = HashMap::new();
+    let mut config = get_default_config();
 
     if config_path.exists() {
         let config_contents =
@@ -30,5 +30,11 @@ pub fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
         }
     }
 
+    config
+}
+
+fn get_default_config() -> HashMap<String, String> {
+    let mut config = HashMap::new();
+    config.insert("diary_path".to_string(), DEFAULT_DIARY_PATH.to_string());
     config
 }
