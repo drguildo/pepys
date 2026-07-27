@@ -12,6 +12,14 @@ const DEFAULT_DIARY_PATH: &str = "pepys";
 
 fn main() {
     let config_path = get_config_path();
+
+    println!(
+        "{}: {}",
+        stringify!(CONFIG_FILENAME),
+        config_path.to_str().unwrap()
+    );
+    println!("{}: {}", stringify!(DEFAULT_DIARY_PATH), DEFAULT_DIARY_PATH);
+
     let config = read_config(&config_path);
     let pepys_dir = if config.contains_key("diary_path") {
         std::path::PathBuf::from(config.get("diary_path").unwrap())
