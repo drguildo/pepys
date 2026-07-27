@@ -24,8 +24,11 @@ pub fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
             std::fs::read_to_string(config_path).expect("Failed to read config file");
         for line in config_contents.lines() {
             if line.contains(" = ") {
-                let split_line = line.split_once(" = ").unwrap();
-                config.insert(split_line.0.to_string(), split_line.1.to_string());
+                if let Some(split_line) = line.split_once(" = ") {
+                    config.insert(split_line.0.to_string(), split_line.1.to_string());
+                } else {
+                    eprintln!("Invalid config line: {}", line);
+                }
             }
         }
     }
