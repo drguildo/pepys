@@ -71,7 +71,7 @@ fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
 
     if config_path.exists() {
         let config_contents =
-            std::fs::read_to_string(&config_path).expect("Failed to read config file");
+            std::fs::read_to_string(config_path).expect("Failed to read config file");
         for line in config_contents.lines() {
             if line.contains(" = ") {
                 let split_line = line.split_once(" = ").unwrap();
