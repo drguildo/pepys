@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     env::args,
     io,
     path::{Path, PathBuf},
@@ -7,25 +6,17 @@ use std::{
 
 use time::{macros::format_description, OffsetDateTime};
 
-const CONFIG_FILENAME: &str = "pepys.conf";
-const DEFAULT_DIARY_PATH: &str = "pepys";
+mod config;
 
 fn main() {
-    let config_path = get_config_path();
+    let config_path = config::get_config_path();
 
-    println!(
-        "{}: {}",
-        stringify!(CONFIG_FILENAME),
-        config_path.to_str().unwrap()
-    );
-    println!("{}: {}", stringify!(DEFAULT_DIARY_PATH), DEFAULT_DIARY_PATH);
-
-    let config = read_config(&config_path);
+    let config = config::read_config(&config_path);
     let pepys_dir = if config.contains_key("diary_path") {
         std::path::PathBuf::from(config.get("diary_path").unwrap())
     } else {
         let mut dir = dirs::home_dir().expect("Failed to locate home directory");
-        dir.push(DEFAULT_DIARY_PATH);
+        dir.push(config::DEFAULT_DIARY_PATH);
         dir
     };
 
@@ -58,29 +49,6 @@ fn main() {
     if edit::edit_file(&diary_entry_path).is_err() {
         eprintln!("Failed to spawn editor");
     }
-}
-
-fn get_config_path() -> PathBuf {
-    let mut config_path = dirs::config_dir().expect("Failed to find user configuration directory");
-    config_path.push(CONFIG_FILENAME);
-    config_path
-}
-
-fn read_config(config_path: &PathBuf) -> HashMap<String, String> {
-    let mut config = HashMap::new();
-
-    if config_path.exists() {
-        let config_contents =
-            std::fs::read_to_string(config_path).expect("Failed to read config file");
-        for line in config_contents.lines() {
-            if line.contains(" = ") {
-                let split_line = line.split_once(" = ").unwrap();
-                config.insert(split_line.0.to_string(), split_line.1.to_string());
-            }
-        }
-    }
-
-    config
 }
 
 fn get_diary_entry_path(diary_path: &Path, entry_date: &OffsetDateTime) -> PathBuf {
