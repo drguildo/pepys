@@ -27,7 +27,7 @@ fn main() {
             std::process::exit(-1);
         }
     } else {
-        time::OffsetDateTime::now_utc()
+        time::OffsetDateTime::now_local().unwrap_or_else(|_| time::OffsetDateTime::now_utc())
     };
 
     let diary_entry_path = get_diary_entry_path(&pepys_dir, &entry_date);
